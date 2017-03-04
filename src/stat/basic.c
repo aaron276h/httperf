@@ -396,7 +396,7 @@ dump(void)
 			}
 	}
 
-	prtinf("\n Individual Connection times:\n")
+	prtinf("\n Individual Connection times:\n");
 	for (i = 0; i < basic.conn_received; i++) {
 	  printf("%f\n",basic.conn_invidual_times[i]);
 	}
