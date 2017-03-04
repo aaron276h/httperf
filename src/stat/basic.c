@@ -105,6 +105,8 @@ static struct {
 
 	u_int           conn_lifetime_hist[NUM_BINS];	/* histogram of
 													 * connection lifetimes */
+	u_int           conn_received;
+	Time            conn_invidual_times[num_connects];
 } basic;
 
 static u_long    num_active_conns;
@@ -243,6 +245,10 @@ conn_destroyed(Event_Type et, Object * obj, Any_Type reg_arg, Any_Type c_arg)
 		if (bin >= NUM_BINS)
 			bin = NUM_BINS;
 		++basic.conn_lifetime_hist[bin];
+
+		basic.conn_invidual_times[basic.conn_received];
+		basic.conn_received++;
+
 	}
 	--num_active_conns;
 }
@@ -388,6 +394,11 @@ dump(void)
 				printf("%16.1f %u\n", 1e3 * time,
 					   basic.conn_lifetime_hist[i]);
 			}
+	}
+
+	prtinf("\n Individual Connection times:\n")
+	for (i = 0; i < basic.conn_received; i++) {
+	  printf("%f\n",basic.conn_invidual_times[i]);
 	}
 
 	printf("\nTotal: connections %lu requests %lu replies %lu "
