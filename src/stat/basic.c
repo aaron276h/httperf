@@ -310,9 +310,10 @@ recv_stop(Event_Type et, Object * obj, Any_Type reg_arg, Any_Type call_arg)
 	assert(et == EV_CALL_RECV_STOP && object_is_call(c));
 	assert(c->basic.time_recv_start > 0);
 
-	Time call_time = timer_now() - c->basic.time_recv_start;
-	basic.call_xfer_sum += call_time;
+	Time time_now = timer_now();
+	basic.call_xfer_sum += time_now - c->basic.time_recv_start;
 
+	Time call_time = time_now - c->basic.time_send_start;
 	if (basic.calls_received < MAX_CALLS) {
 	  basic.calls_individual_times[basic.calls_received] = call_time;
 	  basic.calls_received++;
