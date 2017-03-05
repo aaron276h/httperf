@@ -58,6 +58,7 @@
 #define BIN_WIDTH	1e-3
 #define NUM_BINS	((u_int) (MAX_LIFETIME / BIN_WIDTH))
 #define MAX_CONNECTIONS 50000
+#define MAX_CALLS 50000
 
 static struct {
 	u_long           num_conns_issued;	/* total # of connections * issued */
@@ -107,7 +108,10 @@ static struct {
 	u_int           conn_lifetime_hist[NUM_BINS];	/* histogram of
 													 * connection lifetimes */
 	u_int           conn_received;
-	Time            conn_invidual_times[MAX_CONNECTIONS];
+	Time            conn_individual_times[MAX_CONNECTIONS];
+
+	u_int           calls_received;
+	Time            calls_individual_times[MAX_CALLS];
 } basic;
 
 static u_long    num_active_conns;
@@ -246,7 +250,7 @@ conn_destroyed(Event_Type et, Object * obj, Any_Type reg_arg, Any_Type c_arg)
 			bin = NUM_BINS;
 		++basic.conn_lifetime_hist[bin];
 
-		basic.conn_invidual_times[basic.conn_received] = lifetime;
+		basic.conn_individual_times[basic.conn_received] = lifetime;
 		basic.conn_received++;
 
 	}
@@ -306,7 +310,13 @@ recv_stop(Event_Type et, Object * obj, Any_Type reg_arg, Any_Type call_arg)
 	assert(et == EV_CALL_RECV_STOP && object_is_call(c));
 	assert(c->basic.time_recv_start > 0);
 
-	basic.call_xfer_sum += timer_now() - c->basic.time_recv_start;
+	Time call_time = timer_now() - c->basic.time_recv_start;
+	basic.call_xfer_sum += call_time;
+
+	if (basic.calls_received < MAX_CALLS) {
+	  basic.calls_individual_times[basic.calls_received] = call_time;
+	  basic.calls_received++;
+	}
 
 	basic.hdr_bytes_received += c->reply.header_bytes;
 	basic.reply_bytes_received += c->reply.content_bytes;
@@ -398,7 +408,12 @@ dump(void)
 
 	printf("\nIndividual Connection times:\n");
 	for (i = 0; i < basic.conn_received; i++) {
-	  printf("%f\n",basic.conn_invidual_times[i]);
+	  printf("%f\n",basic.conn_individual_times[i]);
+	}
+
+	printf("\nIndividual Call times:\n");
+	for (i = 0; i < basic.calls_received; i++) {
+	  printf("%f\n",basic.calls_individual_times[i]);
 	}
 
 	printf("\nTotal: connections %lu requests %lu replies %lu "
