@@ -60,7 +60,7 @@
 #define BIN_WIDTH	1e-3
 #define NUM_BINS	((u_int) (MAX_LIFETIME / BIN_WIDTH))
 #define MAX_CONNECTIONS 50000
-#define MAX_CALLS 50000
+#define MAX_CALLS       5000000
 
 static struct {
 	u_long           num_conns_issued;	/* total # of connections * issued */
@@ -252,8 +252,12 @@ conn_destroyed(Event_Type et, Object * obj, Any_Type reg_arg, Any_Type c_arg)
 			bin = NUM_BINS;
 		++basic.conn_lifetime_hist[bin];
 
-		basic.conn_individual_times[basic.conn_received] = lifetime;
-		basic.conn_received++;
+		if (basic.conn_received < MAX_CONNECTIONS) {
+		  basic.conn_individual_times[basic.conn_received] = lifetime;
+		  basic.conn_received++;
+		} else {
+		  printf("\nWARNING: EXCEEDED MAX_CONNECTIONS!\n");
+		}
 
 	}
 	--num_active_conns;
@@ -319,6 +323,8 @@ recv_stop(Event_Type et, Object * obj, Any_Type reg_arg, Any_Type call_arg)
 	if (basic.calls_received < MAX_CALLS) {
 	  basic.calls_individual_times[basic.calls_received] = call_time;
 	  basic.calls_received++;
+	} else {
+	  printf("\nWARNING EXCEEDED MAX_CALLS!\n");
 	}
 
 	basic.hdr_bytes_received += c->reply.header_bytes;
