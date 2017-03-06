@@ -951,7 +951,7 @@ core_init(void)
 		exit(1);
 	}
 
-	rlimit.rlim_cur = rlimit.rlim_max;
+	rlimit.rlim_cur = RLIMIT_NOFILE;
 	if (setrlimit(RLIMIT_NOFILE, &rlimit) < 0) {
 		fprintf(stderr,
 			"%s: failed to increase number of open file limit: %s",

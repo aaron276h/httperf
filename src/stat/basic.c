@@ -106,9 +106,9 @@ static struct {
 	u_wide          footer_bytes_received;	/* sum of all footer bytes */
 
 	u_int           conn_lifetime_hist[NUM_BINS];	/* histogram of
-													 * connection lifetimes */
-  //u_int           calls_received;
-  //Time            calls_individual_times[MAX_CALLS];
+													 * connection lifetimes */ 
+        u_int           calls_received;
+        Time            calls_individual_times[MAX_CALLS];
 } basic;
 
 static u_long    num_active_conns;
@@ -308,14 +308,13 @@ recv_stop(Event_Type et, Object * obj, Any_Type reg_arg, Any_Type call_arg)
 	basic.call_xfer_sum += time_now - c->basic.time_recv_start;
 
 	Time call_time = time_now - c->basic.time_send_start;
-	/*
-	printf("%d\n",basic.calls_received);
+
 	if (basic.calls_received < MAX_CALLS) {
 	  basic.calls_individual_times[basic.calls_received] = call_time;
 	  basic.calls_received++;
 	} else {
 	  printf("\nWARNING EXCEEDED MAX_CALLS!\n");
-	  }*/
+	}
 
 	basic.hdr_bytes_received += c->reply.header_bytes;
 	basic.reply_bytes_received += c->reply.content_bytes;
@@ -411,8 +410,7 @@ dump(void)
 	  printf("%f\n",basic.conn_individual_times[i]);
 	  }*/
 
-	/*
-	printf("\nIndividual Call times:\n");
+      
 	Time sum_for_rand = 0.0;
 	for (i = 0; i < basic.calls_received; i++) {
 	  //printf("%f\n",basic.calls_individual_times[i]);
@@ -438,7 +436,6 @@ dump(void)
 	  fprintf(latency_file, "%f\n",basic.calls_individual_times[i]);
 	}
 	fclose(latency_file);
-	*/
 	
 	printf("\nTotal: connections %lu requests %lu replies %lu "
 		   "test-duration %.3f s\n",
