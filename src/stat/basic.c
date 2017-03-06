@@ -40,6 +40,7 @@
 #include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include <generic_types.h>
 #include <sys/resource.h>
@@ -408,21 +409,24 @@ dump(void)
 			}
 	}
 
+	/*
 	printf("\nIndividual Connection times:\n");
 	for (i = 0; i < basic.conn_received; i++) {
 	  printf("%f\n",basic.conn_individual_times[i]);
-	}
+	  }*/
 
 	printf("\nIndividual Call times:\n");
+	Time sum_for_rand = 0.0;
 	for (i = 0; i < basic.calls_received; i++) {
-	  printf("%f\n",basic.calls_individual_times[i]);
+	  //printf("%f\n",basic.calls_individual_times[i]);
+	  sum_for_rand = sum_for_rand + basic.calls_individual_times[i];
 	}
+	sum_for_rand = sum_for_rand * 10000;
 
 	// Record the data to /tmp/httperf/random
 	char file_path[64] = "/tmp/httperf/";
 
-	time_t t;
-	srand((unsigned) time(&t));
+	srand(sum_for_rand);
 	int file_id = rand();
 	char file_string[32];
 	sprintf(file_string, "%d", file_id);
@@ -430,12 +434,12 @@ dump(void)
 
 	printf("\nSaving to: %s\n", file_path);
 
-	File *latency_file;
+	FILE *latency_file;
 	latency_file = fopen(file_path,"a");
 	for (i = 0; i < basic.calls_received; i++) {
-	  fprintf(fp, "%f\n",basic.calls_individual_times[i]);
+	  fprintf(latency_file, "%f\n",basic.calls_individual_times[i]);
 	}
-	fclose(fp);
+	fclose(latency_file);
 
 	printf("\nTotal: connections %lu requests %lu replies %lu "
 		   "test-duration %.3f s\n",
