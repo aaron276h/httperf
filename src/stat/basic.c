@@ -39,6 +39,7 @@
 #include <errno.h>
 #include <float.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <generic_types.h>
 #include <sys/resource.h>
@@ -416,6 +417,25 @@ dump(void)
 	for (i = 0; i < basic.calls_received; i++) {
 	  printf("%f\n",basic.calls_individual_times[i]);
 	}
+
+	// Record the data to /tmp/httperf/random
+	char file_path[64] = "/tmp/httperf/";
+
+	time_t t;
+	srand((unsigned) time(&t));
+	int file_id = rand();
+	char file_string[32];
+	sprintf(file_string, "%d", file_id);
+	strcat(file_path, file_string);
+
+	printf("\nSaving to: %s\n", file_path);
+
+	File *latency_file;
+	latency_file = fopen(file_path,"a");
+	for (i = 0; i < basic.calls_received; i++) {
+	  fprintf(fp, "%f\n",basic.calls_individual_times[i]);
+	}
+	fclose(fp);
 
 	printf("\nTotal: connections %lu requests %lu replies %lu "
 		   "test-duration %.3f s\n",
